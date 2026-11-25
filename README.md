@@ -401,4 +401,3 @@ AI_CONTEXT:
 | `Authentication failed` en MongoDB | Cambiaste la contraseña después de crear el volumen. Ejecuta `docker compose down -v` y vuelve a levantar. |
 | Pagos rechazados “No hay un turno de caja abierto” | Abre caja: `POST /api/caja/turnos/abrir {"montoInicial":2000}` o vuelve a correr el seed. |
 | Las pruebas fallan tras muchas ejecuciones | Re-ejecuta `docker compose exec rest-api npm run seed` para volver al estado base. |
-# Proyecto-Arquitectura

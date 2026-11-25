@@ -1,0 +1,237 @@
+syntax = "proto3";
+
+// ============================================================
+//  La Casa de la Nana - Contrato gRPC
+//  Autenticacion: metadata "authorization: Bearer <JWT>"
+//  (obten el token con AuthService.Login)
+//  Fechas: strings ISO-8601. Montos: double (MXN).
+// ============================================================
+
+package nana.v1;
+
+// ------------------------- Comunes -------------------------
+message IdRequest { string id = 1; }
+message DeleteResponse { bool ok = 1; string id = 2; string mensaje = 3; }
+
+// ------------------------- Auth -------------------------
+message LoginRequest { string email = 1; string password = 2; }
+message Usuario { string id = 1; string nombre = 2; string email = 3; string rol = 4; }
+message LoginResponse { string token = 1; Usuario usuario = 2; }
+
+service AuthService {
+  rpc Login (LoginRequest) returns (LoginResponse);
+}
+
+// ------------------------- Habitaciones -------------------------
+message Habitacion {
+  string id = 1;
+  string numero = 2;
+  string zona = 3;
+  int32 capacidad = 4;
+  double precio_noche = 5;
+  string estado = 6;
+  repeated string amenidades = 7;
+  string notas = 8;
+  bool activa = 9;
+  string created_at = 10;
+  string updated_at = 11;
+}
+
+message HabitacionInput {
+  optional string numero = 1;
+  optional string zona = 2;
+  optional int32 capacidad = 3;
+  optional double precio_noche = 4;
+  optional string estado = 5;
+  repeated string amenidades = 6;
+  // En Update: true para reemplazar la lista de amenidades
+  bool reemplazar_amenidades = 7;
+  optional string notas = 8;
+  optional bool activa = 9;
+}
+
+message UpdateHabitacionRequest { string id = 1; HabitacionInput data = 2; }
+
+message ListHabitacionesRequest {
+  optional string zona = 1;
+  optional string estado = 2;
+  optional string disponible_desde = 3;
+  optional string disponible_hasta = 4;
+}
+
+message HabitacionList { repeated Habitacion items = 1; int32 total = 2; }
+
+service HabitacionService {
+  rpc Create (HabitacionInput) returns (Habitacion);
+  rpc Get (IdRequest) returns (Habitacion);
+  rpc List (ListHabitacionesRequest) returns (HabitacionList);
+  rpc Update (UpdateHabitacionRequest) returns (Habitacion);
+  rpc Delete (IdRequest) returns (DeleteResponse);
+}
+
+// ------------------------- Mascotas -------------------------
+message Vacuna { string nombre = 1; string fecha_aplicacion = 2; string fecha_vencimiento = 3; }
+
+message Condiciones {
+  bool geriatrico = 1;
+  bool sensible_pirotecnia = 2;
+  bool necesidades_especiales = 3;
+  string descripcion = 4;
+}
+
+message EstadoVacunas { bool vigentes = 1; repeated string faltantes = 2; repeated string vencidas = 3; }
+
+message Mascota {
+  string id = 1;
+  string nombre = 2;
+  string especie = 3;
+  string raza = 4;
+  string sexo = 5;
+  double edad = 6;
+  double peso_kg = 7;
+  string tamano = 8;
+  string tutor_id = 9;
+  string tutor_nombre = 10;
+  Condiciones condiciones = 11;
+  repeated Vacuna vacunas = 12;
+  repeated string alergias = 13;
+  string notas_medicas = 14;
+  string veterinario_contacto = 15;
+  bool activa = 16;
+  EstadoVacunas estado_vacunas = 17;
+  string created_at = 18;
+}
+
+message MascotaInput {
+  optional string nombre = 1;
+  optional string especie = 2;
+  optional string raza = 3;
+  optional string sexo = 4;
+  optional double edad = 5;
+  optional double peso_kg = 6;
+  optional string tamano = 7;
+  optional string tutor_id = 8;
+  Condiciones condiciones = 9;
+  repeated Vacuna vacunas = 10;
+  // En Update: true para reemplazar vacunas / alergias
+  bool reemplazar_vacunas = 11;
+  repeated string alergias = 12;
+  bool reemplazar_alergias = 13;
+  optional string notas_medicas = 14;
+  optional string veterinario_contacto = 15;
+  optional bool activa = 16;
+}
+
+message UpdateMascotaRequest { string id = 1; MascotaInput data = 2; }
+message ListMascotasRequest { optional string nombre = 1; optional string tutor_id = 2; }
+message MascotaList { repeated Mascota items = 1; int32 total = 2; }
+
+service MascotaService {
+  rpc Create (MascotaInput) returns (Mascota);
+  rpc Get (IdRequest) returns (Mascota);
+  rpc List (ListMascotasRequest) returns (MascotaList);
+  rpc Update (UpdateMascotaRequest) returns (Mascota);
+  rpc Delete (IdRequest) returns (DeleteResponse);
+}
+
+// ------------------------- Reservaciones -------------------------
+message ServicioCotizado { string clave = 1; string nombre = 2; double precio = 3; }
+message Pago { string id = 1; double monto = 2; string metodo = 3; string fecha = 4; string referencia = 5; }
+
+message Reservacion {
+  string id = 1;
+  string folio = 2;
+  string mascota_id = 3;
+  string mascota_nombre = 4;
+  string tutor_id = 5;
+  string tutor_nombre = 6;
+  string habitacion_id = 7;
+  string habitacion_numero = 8;
+  string zona = 9;
+  string fecha_entrada = 10;
+  string fecha_salida = 11;
+  int32 noches = 12;
+  double precio_noche = 13;
+  repeated ServicioCotizado servicios = 14;
+  double subtotal_hospedaje = 15;
+  double subtotal_servicios = 16;
+  double total = 17;
+  double pagado = 18;
+  double saldo = 19;
+  repeated Pago pagos = 20;
+  string estado = 21;
+  bool validacion_aprobada = 22;
+  string notas = 23;
+  string created_at = 24;
+}
+
+message ReservacionInput {
+  string mascota_id = 1;
+  optional string habitacion_id = 2;
+  optional string zona = 3;
+  string fecha_entrada = 4;
+  string fecha_salida = 5;
+  // Claves: BANO, PASEO, MEDICACION, TRANSPORTE, DIETA_ESPECIAL
+  repeated string servicios = 6;
+  optional string notas = 7;
+  // false = guardar como COTIZACION (por defecto se confirma)
+  optional bool confirmar = 8;
+}
+
+message ReservacionUpdateInput {
+  optional string habitacion_id = 1;
+  optional string fecha_entrada = 2;
+  optional string fecha_salida = 3;
+  repeated string servicios = 4;
+  bool reemplazar_servicios = 5;
+  optional string notas = 6;
+}
+
+message UpdateReservacionRequest { string id = 1; ReservacionUpdateInput data = 2; }
+
+message ListReservacionesRequest {
+  // Uno o varios estados separados por coma: CONFIRMADA,EN_CURSO
+  optional string estado = 1;
+  optional string zona = 2;
+  optional string mascota_id = 3;
+  int32 page = 4;
+  int32 limit = 5;
+}
+
+message ReservacionList { repeated Reservacion items = 1; int32 total = 2; }
+
+message Cotizacion {
+  string mascota_id = 1;
+  string mascota_nombre = 2;
+  string habitacion_id = 3;
+  string habitacion_numero = 4;
+  string zona = 5;
+  string fecha_entrada = 6;
+  string fecha_salida = 7;
+  int32 noches = 8;
+  double precio_noche = 9;
+  repeated ServicioCotizado servicios = 10;
+  double subtotal_hospedaje = 11;
+  double subtotal_servicios = 12;
+  double total = 13;
+}
+
+message AccionRequest { string id = 1; string nota = 2; }
+message PagoRequest { string id = 1; double monto = 2; string metodo = 3; string referencia = 4; }
+
+service ReservacionService {
+  rpc Create (ReservacionInput) returns (Reservacion);
+  rpc Get (IdRequest) returns (Reservacion);
+  rpc List (ListReservacionesRequest) returns (ReservacionList);
+  rpc Update (UpdateReservacionRequest) returns (Reservacion);
+  rpc Delete (IdRequest) returns (DeleteResponse);
+
+  // Ciclo de vida
+  rpc Cotizar (ReservacionInput) returns (Cotizacion);
+  rpc Confirmar (IdRequest) returns (Reservacion);
+  rpc ValidarMedica (AccionRequest) returns (Reservacion);
+  rpc CheckIn (AccionRequest) returns (Reservacion);
+  rpc RegistrarPago (PagoRequest) returns (Reservacion);
+  rpc CheckOut (AccionRequest) returns (Reservacion);
+  rpc Cancelar (AccionRequest) returns (Reservacion);
+}

@@ -1,0 +1,21 @@
+{
+  "name": "la-casa-de-la-nana",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo del Sistema Integral de Gestion para Hotel y Guarderia Canina La Casa de la Nana (REST + GraphQL + gRPC sobre MongoDB)",
+  "workspaces": [
+    "services/rest-api",
+    "services/graphql-api",
+    "services/grpc-api"
+  ],
+  "scripts": {
+    "up": "docker compose up -d --build",
+    "down": "docker compose down",
+    "seed": "docker compose exec rest-api npm run seed",
+    "logs": "docker compose logs -f --tail=100",
+    "test:rest": "bash scripts/test-rest.sh",
+    "test:graphql": "bash scripts/test-graphql.sh",
+    "test:grpc": "docker compose exec grpc-api npm run client",
+    "test:all": "bash scripts/smoke-test.sh"
+  }
+}

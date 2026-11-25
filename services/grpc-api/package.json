@@ -1,0 +1,22 @@
+{
+  "name": "@nana/grpc-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "La Casa de la Nana - API gRPC (@grpc/grpc-js)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "client": "node src/client.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.13.0",
+    "@grpc/proto-loader": "^0.8.0",
+    "bcryptjs": "^2.4.3",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.9.0"
+  }
+}
